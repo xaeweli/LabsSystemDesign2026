@@ -1,0 +1,83 @@
+components_manager:
+  task_processors:
+    main-task-processor:
+      worker_threads: 4
+    fs-task-processor:
+      worker_threads: 2
+  default_task_processor: main-task-processor
+
+  components:
+    server:
+      listener:
+        port: $server-port
+        task_processor: main-task-processor
+
+    logging:
+      fs-task-processor: fs-task-processor
+      loggers:
+        default:
+          file_path: "@stderr"
+          level: $logger-level
+          overflow_behavior: discard
+
+    recipe-storage: {}
+
+    handler-root:
+      path: /
+      method: GET
+      task_processor: main-task-processor
+
+    handler-users-create:
+      path: /users
+      method: POST
+      task_processor: main-task-processor
+
+    handler-users-by-login:
+      path: /users/login/{username}
+      method: GET
+      task_processor: main-task-processor
+
+    handler-users-search:
+      path: /users/search
+      method: GET
+      task_processor: main-task-processor
+
+    handler-recipes-create:
+      path: /recipes
+      method: POST
+      task_processor: main-task-processor
+
+    handler-recipes-list:
+      path: /recipes
+      method: GET
+      task_processor: main-task-processor
+
+    handler-recipes-search:
+      path: /recipes/search
+      method: GET
+      task_processor: main-task-processor
+
+    handler-recipes-add-ingredient:
+      path: /recipes/{recipe_id}/ingredients
+      method: POST
+      task_processor: main-task-processor
+
+    handler-recipes-ingredients:
+      path: /recipes/{recipe_id}/ingredients
+      method: GET
+      task_processor: main-task-processor
+
+    handler-user-recipes:
+      path: /users/{user_id}/recipes
+      method: GET
+      task_processor: main-task-processor
+
+    handler-user-favorites-add:
+      path: /users/{user_id}/favorites
+      method: POST
+      task_processor: main-task-processor
+
+    handler-user-favorites-list:
+      path: /users/{user_id}/favorites
+      method: GET
+      task_processor: main-task-processor
