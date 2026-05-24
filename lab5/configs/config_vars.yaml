@@ -1,0 +1,3 @@
+server-port: 8080
+logger-level: info
+redis-uri: redis://redis:6379
