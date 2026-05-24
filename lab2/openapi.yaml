@@ -1,0 +1,334 @@
+openapi: 3.0.3
+info:
+  title: Recipe Manager API
+  version: "1.0.0"
+  description: Userver service for users, recipes, ingredients and favorite recipes.
+servers:
+  - url: http://localhost:8080
+paths:
+  /users:
+    post:
+      summary: Create user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUserRequest"
+      responses:
+        "201":
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+  /users/login/{username}:
+    get:
+      summary: Find user by login
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "404":
+          $ref: "#/components/responses/Error"
+  /users/search:
+    get:
+      summary: Search users by first and last name masks
+      parameters:
+        - name: first_name
+          in: query
+          schema:
+            type: string
+          example: Iv*
+        - name: last_name
+          in: query
+          schema:
+            type: string
+          example: Pet*
+      responses:
+        "200":
+          description: Matching users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+        "400":
+          $ref: "#/components/responses/Error"
+  /recipes:
+    post:
+      summary: Create recipe
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateRecipeRequest"
+      responses:
+        "201":
+          description: Recipe created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Recipe"
+        "400":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+    get:
+      summary: List recipes
+      responses:
+        "200":
+          description: Recipes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Recipe"
+  /recipes/search:
+    get:
+      summary: Search recipes by title mask
+      parameters:
+        - name: title
+          in: query
+          required: true
+          schema:
+            type: string
+          example: "*pie*"
+      responses:
+        "200":
+          description: Matching recipes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Recipe"
+        "400":
+          $ref: "#/components/responses/Error"
+  /recipes/{recipe_id}/ingredients:
+    post:
+      summary: Add ingredient to recipe
+      parameters:
+        - $ref: "#/components/parameters/RecipeId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddIngredientRequest"
+      responses:
+        "201":
+          description: Ingredient created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Ingredient"
+        "400":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+    get:
+      summary: Get recipe ingredients
+      parameters:
+        - $ref: "#/components/parameters/RecipeId"
+      responses:
+        "200":
+          description: Ingredients
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Ingredient"
+        "404":
+          $ref: "#/components/responses/Error"
+  /users/{user_id}/recipes:
+    get:
+      summary: Get recipes of user
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+      responses:
+        "200":
+          description: User recipes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Recipe"
+        "404":
+          $ref: "#/components/responses/Error"
+  /users/{user_id}/favorites:
+    post:
+      summary: Add recipe to favorites
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddFavoriteRequest"
+      responses:
+        "200":
+          description: Favorite recipe
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Recipe"
+        "400":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+    get:
+      summary: Get favorite recipes
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+      responses:
+        "200":
+          description: Favorite recipes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Recipe"
+        "404":
+          $ref: "#/components/responses/Error"
+components:
+  parameters:
+    UserId:
+      name: user_id
+      in: path
+      required: true
+      schema:
+        type: string
+    RecipeId:
+      name: recipe_id
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    Error:
+      description: Error response
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  schemas:
+    CreateUserRequest:
+      type: object
+      required: [username, first_name, last_name, email, password]
+      properties:
+        username:
+          type: string
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+    User:
+      type: object
+      required: [id, username, first_name, last_name, email]
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+    CreateRecipeRequest:
+      type: object
+      required: [user_id, title, instructions, cooking_time_minutes]
+      properties:
+        user_id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        instructions:
+          type: string
+        cooking_time_minutes:
+          type: integer
+          minimum: 1
+    Recipe:
+      type: object
+      required: [id, user_id, title, description, instructions, cooking_time_minutes, ingredients]
+      properties:
+        id:
+          type: string
+        user_id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        instructions:
+          type: string
+        cooking_time_minutes:
+          type: integer
+        ingredients:
+          type: array
+          items:
+            $ref: "#/components/schemas/Ingredient"
+    AddIngredientRequest:
+      type: object
+      required: [name, amount]
+      properties:
+        name:
+          type: string
+        amount:
+          type: string
+        unit:
+          type: string
+    Ingredient:
+      type: object
+      required: [id, name, amount, unit]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        amount:
+          type: string
+        unit:
+          type: string
+    AddFavoriteRequest:
+      type: object
+      required: [recipe_id]
+      properties:
+        recipe_id:
+          type: string
+    Error:
+      type: object
+      required: [detail]
+      properties:
+        detail:
+          type: string
